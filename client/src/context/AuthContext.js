@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, password, name, studentId) => {
     try {
-      const response = await api.post('/auth/register', { 
+      await api.post('/auth/register', { 
         username, 
         password, 
         name, 
