@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Team - Student Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-content">
+            <h2>🎓 My Team</h2>
+            <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="dashboard">
+            <div class="welcome-section">
+                <h1>Welcome, <span id="studentName">Student</span>!</h1>
+            </div>
+            
+            <div id="teamContainer">
+                <div class="loading">Loading your team information...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentUser = null;
+        
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/current-user');
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                currentUser = await response.json();
+                if (currentUser.isAdmin) {
+                    window.location.href = '/admin.html';
+                    return;
+                }
+                
+                document.getElementById('studentName').textContent = currentUser.name;
+                await loadMyTeam();
+            } catch (error) {
+                window.location.href = '/';
+            }
+        }
+        
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/';
+        });
+        
+        // Load my team
+        async function loadMyTeam() {
+            try {
+                const response = await fetch('/api/student/my-team');
+                const data = await response.json();
+                
+                const container = document.getElementById('teamContainer');
+                
+                if (!data.hasTeam) {
+                    container.innerHTML = `
+                        <div class="info-box-large">
+                            <div class="empty-icon">📋</div>
+                            <h2>No Team Assigned Yet</h2>
+                            <p>Your instructor hasn't created teams yet. Please check back later.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const team = data.team;
+                const isLeader = data.isLeader;
+                
+                container.innerHTML = `
+                    ${isLeader ? `
+                        <div class="leader-banner">
+                            <span class="leader-icon">👑</span>
+                            <span>You are the Team Leader!</span>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="team-card-large">
+                        <h2>${team.name}</h2>
+                        <div class="team-members-list">
+                            ${team.members.map(member => `
+                                <div class="member-card ${member.isLeader ? 'leader' : ''} ${member.id === currentUser.id ? 'current-user' : ''}">
+                                    <div class="member-info">
+                                        <span class="member-name">${member.name}</span>
+                                        ${member.id === currentUser.id ? '<span class="badge-small">You</span>' : ''}
+                                    </div>
+                                    ${member.isLeader ? '<span class="badge">👑 Team Leader</span>' : '<span class="badge-role">Member</span>'}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="team-info">
+                        <h3>Team Members</h3>
+                        <p>Work together with your team to complete assignments and projects.</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading team:', error);
+                document.getElementById('teamContainer').innerHTML = `
+                    <div class="error-box">
+                        <p>Error loading team information. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Initialize
+        checkAuth();
+    </script>
+</body>
+</html>

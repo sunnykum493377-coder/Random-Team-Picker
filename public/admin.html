@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Team Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-content">
+            <h2>🎓 Admin Dashboard</h2>
+            <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="dashboard">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalStudents">75</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalTeams">0</div>
+                    <div class="stat-label">Teams Generated</div>
+                </div>
+            </div>
+            
+            <div class="action-section">
+                <button id="generateBtn" class="btn btn-primary btn-large">
+                    🎲 Generate Random Teams
+                </button>
+                <p class="help-text">This will create random teams of 3 students with a random leader in each team</p>
+            </div>
+            
+            <div id="message" class="message" style="display: none;"></div>
+            
+            <div class="teams-section">
+                <h2>Generated Teams</h2>
+                <div id="teamsContainer">
+                    <p class="empty-state">No teams generated yet. Click the button above to create teams.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/current-user');
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                const user = await response.json();
+                if (!user.isAdmin) {
+                    window.location.href = '/student.html';
+                }
+            } catch (error) {
+                window.location.href = '/';
+            }
+        }
+        
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/';
+        });
+        
+        // Generate teams
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const messageDiv = document.getElementById('message');
+            const btn = document.getElementById('generateBtn');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating...';
+            
+            try {
+                const response = await fetch('/api/admin/generate-teams', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    messageDiv.textContent = `✓ ${data.message}`;
+                    messageDiv.className = 'message success';
+                    messageDiv.style.display = 'block';
+                    
+                    // Reload teams
+                    await loadTeams();
+                    
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 3000);
+                } else {
+                    messageDiv.textContent = '✗ Failed to generate teams';
+                    messageDiv.className = 'message error';
+                    messageDiv.style.display = 'block';
+                }
+            } catch (error) {
+                messageDiv.textContent = '✗ Connection error';
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🎲 Generate Random Teams';
+            }
+        });
+        
+        // Load teams
+        async function loadTeams() {
+            try {
+                const response = await fetch('/api/admin/teams');
+                const data = await response.json();
+                
+                const container = document.getElementById('teamsContainer');
+                const totalTeamsEl = document.getElementById('totalTeams');
+                
+                if (data.teams.length === 0) {
+                    container.innerHTML = '<p class="empty-state">No teams generated yet. Click the button above to create teams.</p>';
+                    totalTeamsEl.textContent = '0';
+                    return;
+                }
+                
+                totalTeamsEl.textContent = data.teams.length;
+                
+                container.innerHTML = data.teams.map(team => `
+                    <div class="team-card">
+                        <h3>${team.name}</h3>
+                        <div class="team-members">
+                            ${team.members.map(member => `
+                                <div class="member ${member.isLeader ? 'leader' : ''}">
+                                    <span class="member-name">${member.name}</span>
+                                    ${member.isLeader ? '<span class="badge">👑 Leader</span>' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading teams:', error);
+            }
+        }
+        
+        // Initialize
+        checkAuth();
+        loadTeams();
+    </script>
+</body>
+</html>

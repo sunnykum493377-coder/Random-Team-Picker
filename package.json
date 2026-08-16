@@ -1,0 +1,28 @@
+{
+  "name": "student-team-manager",
+  "version": "1.0.0",
+  "description": "Platform for managing student teams with random assignment - React + Express + MongoDB",
+  "main": "server/index.js",
+  "scripts": {
+    "server": "node server/index.js",
+    "client": "cd client && npm start",
+    "dev": "node server/index.js",
+    "seed": "node server/seed.js",
+    "setup": "npm install && cd client && npm install && cd .. && npm run seed"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.6.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "body-parser": "^1.20.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["team", "student", "management", "react", "mongodb"],
+  "author": "",
+  "license": "ISC"
+}
