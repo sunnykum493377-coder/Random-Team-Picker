@@ -47,8 +47,8 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
-    console.log(`Login attempt for username: ${username}, password: ${password}`);
+    const { username, password, name } = req.body;
+    console.log(`Login attempt for username: ${username}, password: ${password}, name: ${name}`);
     
     // Find student by username or studentId
     const student = await Student.findOne({ 
@@ -56,6 +56,10 @@ router.post('/login', async (req, res) => {
     });
     if (!student) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (name && student.name !== name) {
+      return res.status(401).json({ error: 'Name does not match our records' });
     }
     
     // Check password

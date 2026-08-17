@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import './Login.css';
 
 function Login() {
+  const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,7 +16,7 @@ function Login() {
     setError('');
     setLoading(true);
 
-    const result = await login(username, password);
+    const result = await login(username, password, name);
 
     if (result.success) {
       // Navigation is handled by AuthContext and protected routes
@@ -34,6 +35,19 @@ function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label htmlFor="name">Name</label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your Name"
+              required
+              disabled={loading}
+            />
+          </div>
+
           <div className="form-group">
             <label htmlFor="username">University Roll No</label>
             <input
