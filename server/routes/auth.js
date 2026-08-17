@@ -50,8 +50,10 @@ router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     console.log(`Login attempt for username: ${username}, password: ${password}`);
     
-    // Find student
-    const student = await Student.findOne({ username });
+    // Find student by username or studentId
+    const student = await Student.findOne({ 
+      $or: [{ username: username }, { studentId: username }] 
+    });
     if (!student) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }

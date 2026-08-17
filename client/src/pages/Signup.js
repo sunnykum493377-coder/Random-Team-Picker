@@ -7,6 +7,7 @@ import './Signup.css';
 function Signup() {
   const [name, setName] = useState('');
   const [rollNo, setRollNo] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register, login } = useAuth();
@@ -17,13 +18,12 @@ function Signup() {
     setError('');
     setLoading(true);
 
-    // Call register API
-    // We pass Name for both username and name, and Roll No for password and studentId
-    const result = await register(name, rollNo, name, rollNo);
+    // We pass rollNo as username, and the real password
+    const result = await register(rollNo, password, name, rollNo);
 
     if (result.success) {
       // Auto-login after successful registration
-      const loginResult = await login(name, rollNo);
+      const loginResult = await login(rollNo, password);
       if (loginResult.success) {
         // Navigation is handled by AuthContext and protected routes
       } else {
@@ -66,6 +66,19 @@ function Signup() {
               value={rollNo}
               onChange={(e) => setRollNo(e.target.value)}
               placeholder="e.g. 2025BTCS123"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Create a password"
               required
               disabled={loading}
             />

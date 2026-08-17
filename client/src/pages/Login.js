@@ -35,26 +35,26 @@ function Login() {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label htmlFor="username">Name</label>
+            <label htmlFor="username">University Roll No</label>
             <input
               type="text"
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Name"
+              placeholder="e.g. 2025BTCS123"
               required
               disabled={loading}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">University Roll No</label>
+            <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="2025BTCS123"
+              placeholder="Your password"
               required
               disabled={loading}
             />
